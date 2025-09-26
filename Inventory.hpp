@@ -3,20 +3,23 @@
 
 #include <vector>
 #include <stdexcept>
-#include "Item.hpp" // Provided in the starter files
+#include "Item.hpp"
 
 class Inventory {
 private:
-    // A 2D grid of items (bag storage)
+    /** A dynamic grid for storing non-equipped items.
+    * Each outer vector represents a row in the grid,
+    * while the inner vectors represent columns within those rows.
+    */
     std::vector<std::vector<Item>> inventory_grid_;
 
-    // Pointer to the currently equipped item
+    // A pointer to a dynamically allocated Item outside of the Player's bag
     Item* equipped_;
 
-    // Total weight of items in inventory_grid_
+    // The total weight of all items in `inventory_grid_`
     float weight_;
 
-    // Number of non-empty items in inventory_grid_
+    // The total number of non-empty items in `inventory_grid_`
     size_t item_count_;
 
 public:
