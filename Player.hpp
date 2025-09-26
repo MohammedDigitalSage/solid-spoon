@@ -6,8 +6,8 @@
 
 class Player {
 private:
-    Inventory inventory_; // Player's inventory
-    std::string name_;    // Player's name
+    Inventory inventory_; // An Inventory object representing the inventory data of this player
+    std::string name_;    // The name of the player
 
 public:
     /**
@@ -28,7 +28,7 @@ public:
 
     // Accessors
     std::string getName() const;
-    Inventory& getInventoryRef(); // returns reference (not const)
+    Inventory& getInventoryRef();
 };
 
 #endif
