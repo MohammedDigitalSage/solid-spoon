@@ -3,7 +3,6 @@
 #include <vector>
 #include "Item.hpp"
 
-// Type alias for the inventory grid
 using ItemGrid = std::vector<std::vector<Item>>;
 
 class Inventory {
