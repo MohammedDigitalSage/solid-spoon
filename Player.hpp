@@ -1,34 +1,22 @@
-#ifndef PLAYER_HPP
-#define PLAYER_HPP
+#pragma once
 
 #include <string>
 #include "Inventory.hpp"
 
 class Player {
-private:
-    Inventory inventory_; // An Inventory object representing the inventory data of this player
-    std::string name_;    // The name of the player
-
 public:
-    /**
-    * @brief Constructs a Player with the given identifier.
-    * @param name A const. string reference to be the player name
-    * @param inventory A const ref. to an Inventory to copy
-    * and setup a Player's inventory_ member. If none provided,
-    * default value of a default constructed Inventory
-    */
     Player(const std::string& name, const Inventory& inventory = Inventory());
 
-    // Big Five
-    Player(const Player& rhs);                // Copy constructor
-    Player(Player&& rhs) noexcept;            // Move constructor
-    Player& operator=(const Player& rhs);     // Copy assignment
-    Player& operator=(Player&& rhs) noexcept; // Move assignment
-    ~Player() = default;                      // Default destructor
-
-    // Accessors
     std::string getName() const;
     Inventory& getInventoryRef();
-};
 
-#endif
+    Player(const Player& rhs);
+    Player(Player&& rhs) noexcept;
+    Player& operator=(const Player& rhs);
+    Player& operator=(Player&& rhs) noexcept;
+    ~Player() = default;
+
+private:
+    std::string name_;
+    Inventory inventory_;
+};
