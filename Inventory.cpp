@@ -1,32 +1,32 @@
 #include "Inventory.hpp"
 
-// helper: recalculate total weight and item count
+// Helper: recalc total weight and item count (excluding NONE items)
 static void recalcStats(const std::vector<std::vector<Item>>& grid, float& weight, size_t& count) {
-    weight = 0;
+    weight = 0.0f;
     count = 0;
     for (const auto& row : grid) {
         for (const auto& item : row) {
+            // assumes Item provides getType() and getWeight() and ItemType::NONE exists
             if (item.getType() != ItemType::NONE) {
                 weight += item.getWeight();
-                count++;
+                ++count;
             }
         }
     }
 }
 
-// Constructor
+// Constructor (defaults are in the header only)
 Inventory::Inventory(const std::vector<std::vector<Item>>& items, Item* equipped)
-    : inventory_grid_(items), equipped_(equipped) {
+    : inventory_grid_(items), equipped_(equipped), weight_(0.0f), item_count_(0) {
     recalcStats(inventory_grid_, weight_, item_count_);
 }
 
-// Copy constructor
+// Copy constructor (deep copy of equipped)
 Inventory::Inventory(const Inventory& rhs)
-    : inventory_grid_(rhs.inventory_grid_), weight_(rhs.weight_), item_count_(rhs.item_count_) {
+    : inventory_grid_(rhs.inventory_grid_), equipped_(nullptr),
+      weight_(rhs.weight_), item_count_(rhs.item_count_) {
     if (rhs.equipped_) {
         equipped_ = new Item(*rhs.equipped_);
-    } else {
-        equipped_ = nullptr;
     }
 }
 
@@ -36,18 +36,24 @@ Inventory::Inventory(Inventory&& rhs) noexcept
       equipped_(rhs.equipped_),
       weight_(rhs.weight_),
       item_count_(rhs.item_count_) {
+    // Put rhs into a valid empty state as requested by spec:
     rhs.equipped_ = nullptr;
-    rhs.weight_ = 0;
+    rhs.weight_ = 0.0f;
     rhs.item_count_ = 0;
+    rhs.inventory_grid_.clear();
 }
 
-// Copy assignment
+// Copy assignment (deep copy)
 Inventory& Inventory::operator=(const Inventory& rhs) {
     if (this != &rhs) {
+        // free currently owned equipped (if any)
         delete equipped_;
+        equipped_ = nullptr;
+
         inventory_grid_ = rhs.inventory_grid_;
         weight_ = rhs.weight_;
         item_count_ = rhs.item_count_;
+
         if (rhs.equipped_) {
             equipped_ = new Item(*rhs.equipped_);
         } else {
@@ -60,14 +66,21 @@ Inventory& Inventory::operator=(const Inventory& rhs) {
 // Move assignment
 Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
     if (this != &rhs) {
+        // release current resources
         delete equipped_;
+        equipped_ = nullptr;
+
+        // steal resources
         inventory_grid_ = std::move(rhs.inventory_grid_);
         equipped_ = rhs.equipped_;
         weight_ = rhs.weight_;
         item_count_ = rhs.item_count_;
+
+        // leave rhs in a valid empty state
         rhs.equipped_ = nullptr;
-        rhs.weight_ = 0;
+        rhs.weight_ = 0.0f;
         rhs.item_count_ = 0;
+        rhs.inventory_grid_.clear();
     }
     return *this;
 }
@@ -75,18 +88,22 @@ Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
 // Destructor
 Inventory::~Inventory() {
     delete equipped_;
+    equipped_ = nullptr;
 }
 
 // Accessors & Mutators
-Item* Inventory::getEquipped() const { return equipped_; }
+Item* Inventory::getEquipped() const {
+    return equipped_;
+}
 
 void Inventory::equip(Item* itemToEquip) {
-    // Do not delete the old one (as per spec)
+    // Spec says: Update `equipped` to specified item without deallocating original.
+    // That means do NOT delete the previous pointer here.
     equipped_ = itemToEquip;
 }
 
 void Inventory::discardEquipped() {
-    if (equipped_) {
+    if (equipped_ != nullptr) {
         delete equipped_;
         equipped_ = nullptr;
     }
@@ -116,8 +133,10 @@ bool Inventory::store(size_t row, size_t col, const Item& pickup) {
         throw std::out_of_range("Index out of bounds in Inventory::store");
     }
     if (inventory_grid_[row][col].getType() != ItemType::NONE) {
-        return false; // already occupied
+        // Cell already occupied
+        return false;
     }
+    // Put the item there and update stats
     inventory_grid_[row][col] = pickup;
     recalcStats(inventory_grid_, weight_, item_count_);
     return true;
