@@ -2,23 +2,21 @@
 
 // Constructor
 Player::Player(const std::string& name, const Inventory& inventory)
-    : inventory_(inventory), name_(name) {}
+    : name_(name), inventory_(inventory) {}
 
 // Copy constructor
 Player::Player(const Player& rhs)
-    : inventory_(rhs.inventory_), name_(rhs.name_) {}
+    : name_(rhs.name_), inventory_(rhs.inventory_) {}
 
 // Move constructor
 Player::Player(Player&& rhs) noexcept
-    : inventory_(std::move(rhs.inventory_)), name_(std::move(rhs.name_)) {
-    // rhs is left in whatever state std::move created; not required to explicitly clear name_
-}
+    : name_(std::move(rhs.name_)), inventory_(std::move(rhs.inventory_)) {}
 
 // Copy assignment
 Player& Player::operator=(const Player& rhs) {
     if (this != &rhs) {
-        inventory_ = rhs.inventory_;
         name_ = rhs.name_;
+        inventory_ = rhs.inventory_;
     }
     return *this;
 }
@@ -26,13 +24,13 @@ Player& Player::operator=(const Player& rhs) {
 // Move assignment
 Player& Player::operator=(Player&& rhs) noexcept {
     if (this != &rhs) {
-        inventory_ = std::move(rhs.inventory_);
         name_ = std::move(rhs.name_);
+        inventory_ = std::move(rhs.inventory_);
     }
     return *this;
 }
 
-// Accessors
+// Getters
 std::string Player::getName() const {
     return name_;
 }
