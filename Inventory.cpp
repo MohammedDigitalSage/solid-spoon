@@ -1,7 +1,7 @@
 #include "Inventory.hpp"
 #include <stdexcept>
 
-static void recalcStats(const ItemGrid& grid, float& weight, size_t& count) {
+static void recalcStats(const std::vector<std::vector<Item>>& grid, float& weight, size_t& count) {
     weight = 0.0f;
     count = 0;
     for (const auto& row : grid) {
@@ -14,7 +14,7 @@ static void recalcStats(const ItemGrid& grid, float& weight, size_t& count) {
     }
 }
 
-Inventory::Inventory(const ItemGrid& items, Item* equipped)
+Inventory::Inventory(const std::vector<std::vector<Item>>& items, Item* equipped)
     : inventory_grid_(items), equipped_(equipped), weight_(0.0f), item_count_(0) {
     recalcStats(inventory_grid_, weight_, item_count_);
 }
@@ -72,7 +72,7 @@ Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
     return *this;
 }
 
-Inventory::~Inventory() {
+Inventory::~Inventory() noexcept {
     delete equipped_;
     equipped_ = nullptr;
 }
@@ -82,7 +82,7 @@ Item* Inventory::getEquipped() const {
 }
 
 void Inventory::equip(Item* itemToEquip) {
-    equipped_ = itemToEquip; // spec: do NOT delete old equipped
+    equipped_ = itemToEquip;
 }
 
 void Inventory::discardEquipped() {
@@ -92,7 +92,7 @@ void Inventory::discardEquipped() {
     }
 }
 
-ItemGrid Inventory::getItems() const {
+const std::vector<std::vector<Item>>& Inventory::getItems() const {
     return inventory_grid_;
 }
 
