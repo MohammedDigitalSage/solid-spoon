@@ -10,7 +10,9 @@ Player::Player(const Player& rhs)
 
 // Move constructor
 Player::Player(Player&& rhs) noexcept
-    : inventory_(std::move(rhs.inventory_)), name_(std::move(rhs.name_)) {}
+    : inventory_(std::move(rhs.inventory_)), name_(std::move(rhs.name_)) {
+    // rhs is left in whatever state std::move created; not required to explicitly clear name_
+}
 
 // Copy assignment
 Player& Player::operator=(const Player& rhs) {
