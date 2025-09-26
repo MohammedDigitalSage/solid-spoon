@@ -1,12 +1,12 @@
 #include "Inventory.hpp"
+#include <stdexcept>
 
-// Helper: recalc total weight and item count (excluding NONE items)
-static void recalcStats(const std::vector<std::vector<Item>>& grid, float& weight, size_t& count) {
+// helper to recalc stats
+static void recalcStats(const ItemGrid& grid, float& weight, size_t& count) {
     weight = 0.0f;
     count = 0;
     for (const auto& row : grid) {
         for (const auto& item : row) {
-            // assumes Item provides getType() and getWeight() and ItemType::NONE exists
             if (item.getType() != ItemType::NONE) {
                 weight += item.getWeight();
                 ++count;
@@ -15,13 +15,13 @@ static void recalcStats(const std::vector<std::vector<Item>>& grid, float& weigh
     }
 }
 
-// Constructor (defaults are in the header only)
-Inventory::Inventory(const std::vector<std::vector<Item>>& items, Item* equipped)
+// Constructor
+Inventory::Inventory(const ItemGrid& items, Item* equipped)
     : inventory_grid_(items), equipped_(equipped), weight_(0.0f), item_count_(0) {
     recalcStats(inventory_grid_, weight_, item_count_);
 }
 
-// Copy constructor (deep copy of equipped)
+// Copy constructor
 Inventory::Inventory(const Inventory& rhs)
     : inventory_grid_(rhs.inventory_grid_), equipped_(nullptr),
       weight_(rhs.weight_), item_count_(rhs.item_count_) {
@@ -36,17 +36,15 @@ Inventory::Inventory(Inventory&& rhs) noexcept
       equipped_(rhs.equipped_),
       weight_(rhs.weight_),
       item_count_(rhs.item_count_) {
-    // Put rhs into a valid empty state as requested by spec:
     rhs.equipped_ = nullptr;
     rhs.weight_ = 0.0f;
     rhs.item_count_ = 0;
     rhs.inventory_grid_.clear();
 }
 
-// Copy assignment (deep copy)
+// Copy assignment
 Inventory& Inventory::operator=(const Inventory& rhs) {
     if (this != &rhs) {
-        // free currently owned equipped (if any)
         delete equipped_;
         equipped_ = nullptr;
 
@@ -56,8 +54,6 @@ Inventory& Inventory::operator=(const Inventory& rhs) {
 
         if (rhs.equipped_) {
             equipped_ = new Item(*rhs.equipped_);
-        } else {
-            equipped_ = nullptr;
         }
     }
     return *this;
@@ -66,17 +62,14 @@ Inventory& Inventory::operator=(const Inventory& rhs) {
 // Move assignment
 Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
     if (this != &rhs) {
-        // release current resources
         delete equipped_;
         equipped_ = nullptr;
 
-        // steal resources
         inventory_grid_ = std::move(rhs.inventory_grid_);
         equipped_ = rhs.equipped_;
         weight_ = rhs.weight_;
         item_count_ = rhs.item_count_;
 
-        // leave rhs in a valid empty state
         rhs.equipped_ = nullptr;
         rhs.weight_ = 0.0f;
         rhs.item_count_ = 0;
@@ -91,25 +84,23 @@ Inventory::~Inventory() {
     equipped_ = nullptr;
 }
 
-// Accessors & Mutators
+// Getters & mutators
 Item* Inventory::getEquipped() const {
     return equipped_;
 }
 
 void Inventory::equip(Item* itemToEquip) {
-    // Spec says: Update `equipped` to specified item without deallocating original.
-    // That means do NOT delete the previous pointer here.
-    equipped_ = itemToEquip;
+    equipped_ = itemToEquip; // spec: no deallocation
 }
 
 void Inventory::discardEquipped() {
-    if (equipped_ != nullptr) {
+    if (equipped_) {
         delete equipped_;
         equipped_ = nullptr;
     }
 }
 
-std::vector<std::vector<Item>> Inventory::getItems() const {
+ItemGrid Inventory::getItems() const {
     return inventory_grid_;
 }
 
@@ -133,10 +124,8 @@ bool Inventory::store(size_t row, size_t col, const Item& pickup) {
         throw std::out_of_range("Index out of bounds in Inventory::store");
     }
     if (inventory_grid_[row][col].getType() != ItemType::NONE) {
-        // Cell already occupied
         return false;
     }
-    // Put the item there and update stats
     inventory_grid_[row][col] = pickup;
     recalcStats(inventory_grid_, weight_, item_count_);
     return true;
