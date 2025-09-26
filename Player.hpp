@@ -14,7 +14,7 @@ public:
     Player(Player&& rhs) noexcept;
     Player& operator=(const Player& rhs);
     Player& operator=(Player&& rhs) noexcept;
-    ~Player() = default;
+    ~Player() noexcept = default;
 
 private:
     std::string name_;
