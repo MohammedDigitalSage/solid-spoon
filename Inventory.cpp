@@ -1,7 +1,6 @@
 #include "Inventory.hpp"
 #include <stdexcept>
 
-// helper to recalc stats
 static void recalcStats(const ItemGrid& grid, float& weight, size_t& count) {
     weight = 0.0f;
     count = 0;
@@ -15,13 +14,11 @@ static void recalcStats(const ItemGrid& grid, float& weight, size_t& count) {
     }
 }
 
-// Constructor
 Inventory::Inventory(const ItemGrid& items, Item* equipped)
     : inventory_grid_(items), equipped_(equipped), weight_(0.0f), item_count_(0) {
     recalcStats(inventory_grid_, weight_, item_count_);
 }
 
-// Copy constructor
 Inventory::Inventory(const Inventory& rhs)
     : inventory_grid_(rhs.inventory_grid_), equipped_(nullptr),
       weight_(rhs.weight_), item_count_(rhs.item_count_) {
@@ -30,7 +27,6 @@ Inventory::Inventory(const Inventory& rhs)
     }
 }
 
-// Move constructor
 Inventory::Inventory(Inventory&& rhs) noexcept
     : inventory_grid_(std::move(rhs.inventory_grid_)),
       equipped_(rhs.equipped_),
@@ -42,7 +38,6 @@ Inventory::Inventory(Inventory&& rhs) noexcept
     rhs.inventory_grid_.clear();
 }
 
-// Copy assignment
 Inventory& Inventory::operator=(const Inventory& rhs) {
     if (this != &rhs) {
         delete equipped_;
@@ -59,7 +54,6 @@ Inventory& Inventory::operator=(const Inventory& rhs) {
     return *this;
 }
 
-// Move assignment
 Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
     if (this != &rhs) {
         delete equipped_;
@@ -78,19 +72,17 @@ Inventory& Inventory::operator=(Inventory&& rhs) noexcept {
     return *this;
 }
 
-// Destructor
 Inventory::~Inventory() {
     delete equipped_;
     equipped_ = nullptr;
 }
 
-// Getters & mutators
 Item* Inventory::getEquipped() const {
     return equipped_;
 }
 
 void Inventory::equip(Item* itemToEquip) {
-    equipped_ = itemToEquip; // spec: no deallocation
+    equipped_ = itemToEquip; // spec: do NOT delete old equipped
 }
 
 void Inventory::discardEquipped() {
