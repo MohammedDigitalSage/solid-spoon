@@ -3,58 +3,55 @@
 
 #include <vector>
 #include <stdexcept>
-#include "Item.hpp" // we assume Item is given already
+#include "Item.hpp" // Provided in the starter files
 
 class Inventory {
 private:
-    // 2D grid of items (like a bag)
+    // A 2D grid of items (bag storage)
     std::vector<std::vector<Item>> inventory_grid_;
 
-    // pointer to currently equipped item (like wearing armor/holding weapon)
+    // Pointer to the currently equipped item
     Item* equipped_;
 
-    // keep track of total weight
+    // Total weight of items in inventory_grid_
     float weight_;
 
-    // keep track of how many real items we have
+    // Number of non-empty items in inventory_grid_
     size_t item_count_;
 
 public:
-    // constructor (default is 10x10 empty items, nothing equipped)
-    Inventory(const std::vector<std::vector<Item>>& items = std::vector<std::vector<Item>>(10, std::vector<Item>(10, Item())),
+    /**
+    * @brief Constructor with optional parameters for initialization.
+    * @param items A const reference to a 2D vector of items.
+    * Defaults to a 10x10 grid of default-constructed items, if none provided.
+    * @param equipped A pointer to an Item object.
+    * Defaults to nullptr, if none provided.
+    *
+    * @post Initializes members in the following way:
+    * 1) Initializes `weight_` as the total weight of all items in `items` (excluding NONE type)
+    * 2) Initializes `item_count_` as the count of non-NONE items.
+    *
+    * NOTE: The `equipped` item is excluded from these calculations.
+    */
+    Inventory(const std::vector<std::vector<Item>>& items =
+                  std::vector<std::vector<Item>>(10, std::vector<Item>(10, Item())),
               Item* equipped = nullptr);
 
-    // copy constructor (deep copy)
-    Inventory(const Inventory& rhs);
+    // Big Five
+    Inventory(const Inventory& rhs);               // Copy constructor
+    Inventory(Inventory&& rhs) noexcept;           // Move constructor
+    Inventory& operator=(const Inventory& rhs);    // Copy assignment
+    Inventory& operator=(Inventory&& rhs) noexcept;// Move assignment
+    ~Inventory();                                  // Destructor
 
-    // move constructor
-    Inventory(Inventory&& rhs) noexcept;
-
-    // copy assignment operator
-    Inventory& operator=(const Inventory& rhs);
-
-    // move assignment operator
-    Inventory& operator=(Inventory&& rhs) noexcept;
-
-    // destructor
-    ~Inventory();
-
-    // getters
+    // Accessors & Mutators
     Item* getEquipped() const;
+    void equip(Item* itemToEquip);
+    void discardEquipped();
     std::vector<std::vector<Item>> getItems() const;
     float getWeight() const;
     size_t getCount() const;
-
-    // equip item
-    void equip(Item* itemToEquip);
-
-    // discard equipped item
-    void discardEquipped();
-
-    // access item at row,col
     Item at(size_t row, size_t col) const;
-
-    // store item in grid
     bool store(size_t row, size_t col, const Item& pickup);
 };
 
